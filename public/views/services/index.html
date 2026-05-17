@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <?php include __DIR__ . '/../partials/head.html'; ?>
+    <link rel="stylesheet" type="text/css" href="/public/styles/services.css" />
+    <title>Services - PrivacyMap</title>
+  </head>
+  <body>
+    <?php include __DIR__ . '/../partials/nav.html'; ?>
+    <main class="page">
+      <?php if(isset($messages) && $messages): ?><p class="message"><?= $this->e($messages) ?></p><?php endif; ?>
+      <section class="page-header">
+        <div>
+          <p class="eyebrow">Data Sovereignty</p>
+          <h1>Data Sources</h1>
+        </div>
+        <a class="button" href="/services/add">Add Service</a>
+      </section>
+
+      <form class="filters" method="GET" action="/services">
+        <input name="q" placeholder="Search services" value="<?= $this->e($filters['q'] ?? '') ?>" />
+        <select name="category_id">
+          <option value="">All categories</option>
+          <?php foreach($categories as $category): ?>
+            <option value="<?= (int) $category['id'] ?>" <?= (string)($filters['category_id'] ?? '') === (string)$category['id'] ? 'selected' : '' ?>>
+              <?= $this->e($category['name']) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+        <select name="data_type_id">
+          <option value="">All data types</option>
+          <?php foreach($dataTypes as $type): ?>
+            <option value="<?= (int) $type['id'] ?>" <?= (string)($filters['data_type_id'] ?? '') === (string)$type['id'] ? 'selected' : '' ?>>
+              <?= $this->e($type['name']) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+        <select name="risk_level">
+          <option value="">All risk levels</option>
+          <?php foreach(['low', 'medium', 'high'] as $level): ?>
+            <option value="<?= $level ?>" <?= ($filters['risk_level'] ?? '') === $level ? 'selected' : '' ?>><?= ucfirst($level) ?></option>
+          <?php endforeach; ?>
+        </select>
+        <select name="sort">
+          <option value="">Newest first</option>
+          <option value="risk" <?= ($filters['sort'] ?? '') === 'risk' ? 'selected' : '' ?>>Risk highest first</option>
+        </select>
+        <button type="submit">Apply</button>
+      </form>
+
+      <section class="source-list">
+        <?php foreach($services as $service): ?>
+          <article class="source-row">
+            <div class="source-icon"><?= strtoupper(substr($this->e($service['display_name']), 0, 1)) ?></div>
+            <div class="source-copy">
+              <h2><a href="/services/<?= (int) $service['id'] ?>"><?= $this->e($service['display_name']) ?></a></h2>
+              <p><?= $this->e($service['notes'] ?: ($service['category_name'] ?? 'Personal data source')) ?></p>
+              <div class="tag-list">
+                <span class="tag"><?= $this->e($service['category_name'] ?? 'Uncategorized') ?></span>
+                <span class="tag"><?= (int) $service['risk_score'] ?> score</span>
+              </div>
+            </div>
+            <div class="source-points">
+              <strong><?= str_pad((string) (int) $service['data_points'], 2, '0', STR_PAD_LEFT) ?></strong>
+              <span>Data Points</span>
+            </div>
+            <span class="badge <?= $this->e($service['risk_level']) ?>"><?= $this->e($service['risk_level']) ?> Risk</span>
+          </article>
+        <?php endforeach; ?>
+      </section>
+      <?php if(!$services): ?><p class="panel">No services match your filters.</p><?php endif; ?>
+      <footer class="list-footer">
+        <strong><?= count($services) ?> Sources Active</strong>
+        <span>Previous <b>1</b> Next</span>
+      </footer>
+    </main>
+  </body>
+</html>

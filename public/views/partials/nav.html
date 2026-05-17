@@ -1,0 +1,19 @@
+<nav class="top-nav">
+  <a class="brand" href="/dashboard">PrivacyMap</a>
+  <button class="menu-button" type="button" aria-label="Open navigation">Menu</button>
+  <ul class="nav-links">
+    <?php if(isset($currentUser) && $currentUser): ?>
+      <?php $activePath = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'); ?>
+      <li><a class="<?= $activePath === 'dashboard' ? 'active' : '' ?>" href="/dashboard">Dashboard</a></li>
+      <li><a class="<?= str_starts_with($activePath, 'services') ? 'active' : '' ?>" href="/services">Services</a></li>
+      <li><a class="<?= $activePath === 'insights' ? 'active' : '' ?>" href="/insights">Insights</a></li>
+      <?php if(($currentUser['role'] ?? '') === 'admin'): ?>
+        <li><a class="<?= $activePath === 'admin' ? 'active' : '' ?>" href="/admin">Admin</a></li>
+      <?php endif; ?>
+      <li class="nav-icon"><a title="Logout" href="/logout">●</a></li>
+    <?php else: ?>
+      <li><a href="/login">Login</a></li>
+      <li><a href="/register">Register</a></li>
+    <?php endif; ?>
+  </ul>
+</nav>

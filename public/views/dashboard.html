@@ -1,11 +1,87 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-</head>
-<body>
-    <h1>DASHBOARD</h1>
-</body>
+  <head>
+    <?php include __DIR__ . '/partials/head.html'; ?>
+    <link rel="stylesheet" type="text/css" href="/public/styles/dashboard.css" />
+    <title>Dashboard - PrivacyMap</title>
+  </head>
+  <body>
+    <?php include __DIR__ . '/partials/nav.html'; ?>
+    <main class="page">
+      <?php if(isset($messages) && $messages): ?><p class="message"><?= $this->e($messages) ?></p><?php endif; ?>
+      <section class="page-header">
+        <div>
+          <p class="eyebrow">Digital Curator</p>
+          <h1>Data Exposure Overview</h1>
+        </div>
+        <div class="actions">
+          <a class="button" href="/services/add">Add Service</a>
+          <a class="button secondary" href="/services">View All Services</a>
+        </div>
+      </section>
+
+      <section class="metric-grid">
+        <article class="metric"><span>Total Services</span><strong><?= (int) $metrics['totalServices'] ?></strong></article>
+        <article class="metric"><span>Email Usage</span><strong><?= (int) $metrics['email'] ?></strong></article>
+        <article class="metric"><span>Phone Usage</span><strong><?= (int) $metrics['phone'] ?></strong></article>
+        <article class="metric danger-metric"><span>Address Exposure</span><strong><?= (int) $metrics['address'] ?></strong></article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article>
+          <div class="section-title">
+            <h2>Most Exposed Services</h2>
+            <span class="eyebrow">Sorted by Risk Level</span>
+          </div>
+          <?php foreach($topRiskyServices as $service): ?>
+            <div class="source-row compact">
+              <div class="source-icon"><?= strtoupper(substr($this->e($service['display_name']), 0, 1)) ?></div>
+              <div class="source-copy">
+                <a href="/services/<?= (int) $service['id'] ?>"><?= $this->e($service['display_name']) ?></a>
+                <div class="tag-list">
+                  <span class="tag">Score <?= (int) $service['risk_score'] ?></span>
+                </div>
+              </div>
+              <span class="badge <?= $this->e($service['risk_level']) ?>"><?= $this->e($service['risk_level']) ?> Risk</span>
+              <a class="row-arrow" href="/services/<?= (int) $service['id'] ?>">›</a>
+            </div>
+          <?php endforeach; ?>
+          <?php if(!$topRiskyServices): ?><p class="muted">Add services to see risk ranking.</p><?php endif; ?>
+        </article>
+        <aside>
+          <h2>Recently Added</h2>
+          <?php foreach($latestServices as $service): ?>
+            <div class="recent-row">
+              <div class="source-icon small"><?= strtoupper(substr($this->e($service['display_name']), 0, 1)) ?></div>
+              <div>
+                <a href="/services/<?= (int) $service['id'] ?>"><?= $this->e($service['display_name']) ?></a>
+                <p class="eyebrow">Added recently</p>
+              </div>
+            </div>
+          <?php endforeach; ?>
+          <?php if(!$latestServices): ?><p class="muted">No services yet.</p><?php endif; ?>
+          <div class="health-card">
+            <div class="shield">◆</div>
+            <h3>Privacy Health is improving</h3>
+            <p>Your current privacy health score is <?= (int) $metrics['privacyHealth'] ?>%. Keep reducing high-risk exposures first.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="footprint-section">
+        <div>
+          <h2>Personal Data Footprint</h2>
+          <p class="muted">Your curator has mapped <?= (int) $metrics['dataPoints'] ?> data points across <?= (int) $metrics['totalServices'] ?> services. Start with high-risk services and address exposure first.</p>
+          <div class="mini-stats">
+            <div><span>Safe</span><strong><?= max(0, (int) $metrics['privacyHealth']) ?>%</strong></div>
+            <div><span>Monitored</span><strong><?= (int) $metrics['totalServices'] ?></strong></div>
+            <div><span>Critical</span><strong><?= (int) $metrics['highRisk'] ?></strong></div>
+          </div>
+        </div>
+        <div class="radial-card">
+          <div class="radial-number"><?= (int) $metrics['dataPoints'] ?><span>Total Points</span></div>
+        </div>
+      </section>
+    </main>
+  </body>
 </html>

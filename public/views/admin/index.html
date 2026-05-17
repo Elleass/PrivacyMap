@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <?php include __DIR__ . '/../partials/head.html'; ?>
+    <link rel="stylesheet" type="text/css" href="/public/styles/admin.css" />
+    <title>Admin - PrivacyMap</title>
+  </head>
+  <body class="admin-page">
+    <?php include __DIR__ . '/../partials/nav.html'; ?>
+    <main class="page">
+      <?php if(isset($messages) && $messages): ?><p class="message"><?= $this->e($messages) ?></p><?php endif; ?>
+      <section class="page-header">
+        <div>
+          <p class="eyebrow">Administration</p>
+          <h1>Catalog Management</h1>
+          <p class="lede">Maintain the dictionaries that power service exposure tracking.</p>
+        </div>
+      </section>
+
+      <section class="three-column">
+        <article class="panel">
+          <h2>Categories</h2>
+          <form method="POST" action="/admin" class="stack">
+            <input type="hidden" name="csrf_token" value="<?= $this->e($csrfToken) ?>" />
+            <input type="hidden" name="type" value="category" />
+            <input name="name" placeholder="Name" required />
+            <input name="description" placeholder="Description" />
+            <button type="submit">Add Category</button>
+          </form>
+          <?php foreach($categories as $category): ?>
+            <div class="list-row">
+              <span><?= $this->e($category['name']) ?></span>
+              <form method="POST" action="/admin/categories/<?= (int) $category['id'] ?>/delete">
+                <input type="hidden" name="csrf_token" value="<?= $this->e($csrfToken) ?>" />
+                <button class="link-button" type="submit">Delete</button>
+              </form>
+            </div>
+          <?php endforeach; ?>
+        </article>
+
+        <article class="panel">
+          <h2>Data Types</h2>
+          <form method="POST" action="/admin" class="stack">
+            <input type="hidden" name="csrf_token" value="<?= $this->e($csrfToken) ?>" />
+            <input type="hidden" name="type" value="data_type" />
+            <input name="name" placeholder="Name" required />
+            <input name="description" placeholder="Description" />
+            <input name="sensitivity_level" type="number" min="1" max="5" value="1" required />
+            <button type="submit">Add Data Type</button>
+          </form>
+          <?php foreach($dataTypes as $type): ?>
+            <div class="list-row">
+              <span><?= $this->e($type['name']) ?> (<?= (int) $type['sensitivity_level'] ?>)</span>
+              <form method="POST" action="/admin/data-types/<?= (int) $type['id'] ?>/delete">
+                <input type="hidden" name="csrf_token" value="<?= $this->e($csrfToken) ?>" />
+                <button class="link-button" type="submit">Delete</button>
+              </form>
+            </div>
+          <?php endforeach; ?>
+        </article>
+
+        <article class="panel">
+          <h2>Global Services</h2>
+          <form method="POST" action="/admin" class="stack">
+            <input type="hidden" name="csrf_token" value="<?= $this->e($csrfToken) ?>" />
+            <input type="hidden" name="type" value="catalog_service" />
+            <input name="name" placeholder="Name" required />
+            <input name="website_url" placeholder="https://example.com" />
+            <input name="description" placeholder="Description" />
+            <select name="category_id">
+              <option value="0">Category</option>
+              <?php foreach($categories as $category): ?>
+                <option value="<?= (int) $category['id'] ?>"><?= $this->e($category['name']) ?></option>
+              <?php endforeach; ?>
+            </select>
+            <button type="submit">Add Service</button>
+          </form>
+          <?php foreach($catalogServices as $service): ?>
+            <div class="list-row">
+              <span><?= $this->e($service['name']) ?></span>
+              <form method="POST" action="/admin/catalog-services/<?= (int) $service['id'] ?>/delete">
+                <input type="hidden" name="csrf_token" value="<?= $this->e($csrfToken) ?>" />
+                <button class="link-button" type="submit">Delete</button>
+              </form>
+            </div>
+          <?php endforeach; ?>
+        </article>
+      </section>
+
+      <section class="panel">
+        <h2>Users</h2>
+        <?php foreach($users as $user): ?>
+          <div class="list-row">
+            <span><?= $this->e($user['name']) ?> &lt;<?= $this->e($user['email']) ?>&gt;</span>
+            <span><?= $this->e($user['role']) ?>, <?= (int) $user['services_count'] ?> services</span>
+          </div>
+        <?php endforeach; ?>
+      </section>
+    </main>
+  </body>
+</html>

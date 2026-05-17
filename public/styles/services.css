@@ -1,0 +1,33 @@
+.source-list {
+  margin-top: 0.5rem;
+}
+
+.source-row {
+  min-height: 122px;
+}
+
+.source-copy h2 {
+  font-size: 1.1rem;
+}
+
+.filters {
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 1366px) {
+  .source-list {
+    margin-top: 0.25rem;
+  }
+
+  .source-row {
+    min-height: 96px;
+  }
+
+  .source-copy h2 {
+    font-size: 1rem;
+  }
+
+  .filters {
+    margin-bottom: 1.35rem;
+  }
+}

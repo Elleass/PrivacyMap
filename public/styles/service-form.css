@@ -1,0 +1,34 @@
+.form-shell {
+  align-items: start;
+}
+
+.identity-form input,
+.identity-form select,
+.identity-form textarea {
+  min-height: 58px;
+  border-width: 2px;
+}
+
+.risk-preview h2 {
+  font-size: 1.2rem;
+}
+
+.quote-card {
+  min-height: 210px;
+}
+
+@media (max-width: 1366px) {
+  .identity-form input,
+  .identity-form select,
+  .identity-form textarea {
+    min-height: 50px;
+  }
+
+  .risk-preview h2 {
+    font-size: 1.05rem;
+  }
+
+  .quote-card {
+    min-height: 165px;
+  }
+}

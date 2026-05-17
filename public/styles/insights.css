@@ -1,0 +1,25 @@
+.quick-insight {
+  font-size: 0.92rem;
+}
+
+.top-service-row {
+  gap: 1rem;
+}
+
+.audit-cta {
+  margin-top: 3rem;
+}
+
+@media (max-width: 1366px) {
+  .quick-insight {
+    font-size: 0.85rem;
+  }
+
+  .top-service-row {
+    min-height: 58px;
+  }
+
+  .audit-cta {
+    margin-top: 2.2rem;
+  }
+}

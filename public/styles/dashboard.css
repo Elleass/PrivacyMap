@@ -1,0 +1,39 @@
+.dashboard-grid {
+  align-items: start;
+}
+
+.dashboard-grid h2,
+.footprint-section h2 {
+  font-size: 1.3rem;
+}
+
+.metric {
+  min-height: 150px;
+}
+
+.health-card {
+  margin-top: 1.5rem;
+}
+
+.footprint-section {
+  margin-top: 4rem;
+}
+
+@media (max-width: 1366px) {
+  .dashboard-grid h2,
+  .footprint-section h2 {
+    font-size: 1.12rem;
+  }
+
+  .metric {
+    min-height: 118px;
+  }
+
+  .health-card {
+    margin-top: 1rem;
+  }
+
+  .footprint-section {
+    margin-top: 3rem;
+  }
+}

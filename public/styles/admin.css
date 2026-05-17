@@ -1,0 +1,13 @@
+.admin-page .three-column {
+  align-items: start;
+}
+
+.admin-page .panel h2 {
+  font-size: 1.15rem;
+}
+
+.admin-page input,
+.admin-page select {
+  min-height: 50px;
+  border-width: 2px;
+}

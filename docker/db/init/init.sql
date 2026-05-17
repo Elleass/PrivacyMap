@@ -1,11 +1,2 @@
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,    
-    username VARCHAR(50) UNIQUE NOT NULL,
-    
-    email VARCHAR(255) UNIQUE NOT NULL,    
-    password TEXT NOT NULL,
-    
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    
-    is_active BOOLEAN DEFAULT TRUE
-);
+\i /docker-entrypoint-initdb.d/schema.sql
+\i /docker-entrypoint-initdb.d/seed.sql

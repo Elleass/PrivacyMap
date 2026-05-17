@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <?php include __DIR__ . '/partials/head.html'; ?>
+    <link rel="stylesheet" type="text/css" href="/public/styles/insights.css" />
+    <title>Insights - PrivacyMap</title>
+  </head>
+  <body>
+    <?php include __DIR__ . '/partials/nav.html'; ?>
+    <main class="page">
+      <section class="page-header">
+        <div>
+          <p class="eyebrow">Privacy Insights</p>
+          <h1><?= (int) $metrics['dataPoints'] ?> Data Points Found.</h1>
+        </div>
+        <article class="quick-insight">
+          <p class="eyebrow">Quick Insight</p>
+          <p>Most services use email and phone together, increasing cross-platform tracking risk.</p>
+        </article>
+      </section>
+
+      <h2>Data Distribution</h2>
+      <section class="metric-grid">
+        <article class="metric"><span>Email Records</span><strong><?= (int) $metrics['email'] ?></strong></article>
+        <article class="metric"><span>Phone Entries</span><strong><?= (int) $metrics['phone'] ?></strong></article>
+        <article class="metric"><span>Address Points</span><strong><?= (int) $metrics['address'] ?></strong></article>
+      </section>
+
+      <section class="two-column">
+        <article class="panel">
+          <h2>Data Type Distribution</h2>
+          <?php foreach($distribution as $row): ?>
+            <div class="list-row"><span><?= $this->e($row['name']) ?></span><strong><?= (int) $row['count'] ?></strong></div>
+          <?php endforeach; ?>
+        </article>
+        <article class="panel">
+          <h2>Risk Overview</h2>
+          <?php foreach($riskBreakdown as $row): ?>
+            <div class="list-row"><span class="badge <?= $this->e($row['risk_level']) ?>"><?= $this->e($row['risk_level']) ?></span><strong><?= (int) $row['count'] ?></strong></div>
+          <?php endforeach; ?>
+        </article>
+      </section>
+
+      <section class="panel">
+        <h2>Top Services by Risk</h2>
+        <?php foreach($topRiskyServices as $service): ?>
+          <div class="top-service-row">
+            <div class="source-icon small"><?= strtoupper(substr($this->e($service['display_name']), 0, 1)) ?></div>
+            <a href="/services/<?= (int) $service['id'] ?>"><?= $this->e($service['display_name']) ?></a>
+            <strong><?= (int) $service['risk_score'] ?> pts</strong>
+            <span class="badge <?= $this->e($service['risk_level']) ?>"><?= $this->e($service['risk_level']) ?> Risk</span>
+          </div>
+        <?php endforeach; ?>
+      </section>
+      <section class="audit-cta">
+        <div>
+          <h2>Generate a Full Audit?</h2>
+          <p>Run a local summary against the services already stored in your footprint.</p>
+        </div>
+        <a class="button secondary" href="/services">Run Deep Audit</a>
+      </section>
+    </main>
+  </body>
+</html>

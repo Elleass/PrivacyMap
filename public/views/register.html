@@ -3,23 +3,23 @@
   <head>
     <?php include __DIR__ . '/partials/head.html'; ?>
     <link rel="stylesheet" type="text/css" href="/public/styles/auth.css" />
-    <title>Login - PrivacyMap</title>
+    <title>Register - PrivacyMap</title>
   </head>
   <body class="auth-page">
     <main class="auth-card">
-      <h1>Login</h1>
-      <p class="muted">Map your personal data exposure without connecting external accounts.</p>
+      <h1>Register</h1>
       <?php if(isset($messages) && $messages): ?>
         <p class="message"><?= $this->e($messages) ?></p>
       <?php endif; ?>
-      <form method="POST" action="/login" class="stack">
+      <form method="POST" action="/register" class="stack">
         <input type="hidden" name="csrf_token" value="<?= $this->e($csrfToken) ?>" />
+        <label>Name <input name="name" type="text" required /></label>
         <label>Email <input name="email" type="email" required /></label>
-        <label>Password <input name="password" type="password" required /></label>
-        <button type="submit">Login</button>
+        <label>Password <input name="password" type="password" minlength="8" required /></label>
+        <label>Repeat password <input name="password2" type="password" minlength="8" required /></label>
+        <button type="submit">Register</button>
       </form>
-      <p class="muted">Demo: user@example.com / password or admin@example.com / password</p>
-      <a href="/register">Create an account</a>
+      <a href="/login">Back to login</a>
     </main>
   </body>
 </html>

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <?php include __DIR__ . '/../partials/head.html'; ?>
+    <link rel="stylesheet" type="text/css" href="/public/styles/service-detail.css" />
+    <title><?= $this->e($service['display_name']) ?> - PrivacyMap</title>
+  </head>
+  <body>
+    <?php include __DIR__ . '/../partials/nav.html'; ?>
+    <main class="page">
+      <?php if(isset($messages) && $messages): ?><p class="message"><?= $this->e($messages) ?></p><?php endif; ?>
+      <section class="page-header">
+        <div>
+          <p class="eyebrow">Services &gt; <?= $this->e($service['display_name']) ?></p>
+          <div class="identity-header">
+            <div class="source-icon large"><?= strtoupper(substr($this->e($service['display_name']), 0, 1)) ?></div>
+            <div>
+              <h1><?= $this->e($service['display_name']) ?></h1>
+              <?php if($service['website_url']): ?><a href="<?= $this->e($service['website_url']) ?>" target="_blank" rel="noreferrer"><?= $this->e($service['website_url']) ?></a><?php endif; ?>
+            </div>
+          </div>
+          <p class="lede"><?= $this->e($service['notes'] ?: 'This service is mapped as part of your personal data footprint.') ?></p>
+        </div>
+        <article class="status-card">
+          <p class="eyebrow">Security Status</p>
+          <span class="badge <?= $this->e($service['risk_level']) ?>"><?= $this->e($service['risk_level']) ?> Risk</span>
+          <h2><?= count($dataTypes) ?> Data Points</h2>
+          <p class="muted">Risk Score <?= (int) $service['risk_score'] ?></p>
+        </article>
+      </section>
+
+      <section class="detail-grid">
+        <article class="panel">
+          <div class="section-title">
+            <h2>Shared Data</h2>
+            <span class="eyebrow">Selected</span>
+          </div>
+          <div class="shared-data-list">
+            <?php foreach($dataTypes as $type): ?>
+              <div class="shared-data-item">
+                <span class="checkmark">✓</span>
+                <div>
+                  <strong><?= $this->e($type['name']) ?></strong>
+                  <p class="muted">Sensitivity weight <?= (int) $type['sensitivity_level'] ?></p>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          </div>
+          <?php if(!$dataTypes): ?><p class="muted">No data types selected.</p><?php endif; ?>
+          <div class="actions panel-actions">
+            <a class="button" href="/services/<?= (int) $service['id'] ?>/edit">Edit</a>
+            <form method="POST" action="/services/<?= (int) $service['id'] ?>/delete">
+              <input type="hidden" name="csrf_token" value="<?= $this->e($csrfToken) ?>" />
+              <button class="danger" type="submit">Delete</button>
+            </form>
+          </div>
+        </article>
+
+        <aside>
+          <article class="map-card">
+            <p class="eyebrow">Propagation Map</p>
+            <div class="network-art">
+              <span>Tracking Active: <?= count($dataTypes) ?> Nodes</span>
+            </div>
+          </article>
+          <article class="panel">
+            <h2>Privacy Recommendation</h2>
+            <?php foreach($recommendations as $item): ?>
+              <div class="recommendation-row">
+                <span class="shield-mini">◆</span>
+                <div>
+                  <strong><?= $this->e($item['title']) ?></strong>
+                  <p class="muted"><?= $this->e($item['description']) ?></p>
+                </div>
+                <?php if(!$item['is_completed']): ?>
+                  <form method="POST" action="/services/<?= (int) $service['id'] ?>/recommendations/<?= (int) $item['id'] ?>/complete">
+                    <input type="hidden" name="csrf_token" value="<?= $this->e($csrfToken) ?>" />
+                    <button class="button secondary" type="submit">Done</button>
+                  </form>
+                <?php endif; ?>
+              </div>
+            <?php endforeach; ?>
+          </article>
+        </aside>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <?php include __DIR__ . '/../partials/head.html'; ?>
+    <link rel="stylesheet" type="text/css" href="/public/styles/service-form.css" />
+    <title><?= $this->e($title) ?> - PrivacyMap</title>
+  </head>
+  <body>
+    <?php include __DIR__ . '/../partials/nav.html'; ?>
+    <main class="page">
+      <section class="page-header">
+        <div>
+          <p class="eyebrow">Data Identity</p>
+          <h1><?= $this->e($title) ?></h1>
+          <p class="lede">Define how a platform interacts with your personal data footprint.</p>
+        </div>
+      </section>
+
+      <?php if($errors): ?>
+        <div class="message">
+          <?php foreach($errors as $error): ?><p><?= $this->e($error) ?></p><?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+
+      <section class="form-shell">
+        <form method="POST" action="<?= $this->e($action) ?>" class="panel form-grid identity-form">
+          <input type="hidden" name="csrf_token" value="<?= $this->e($csrfToken) ?>" />
+          <label>Catalog Service
+            <select name="service_id">
+              <option value="0">Custom service</option>
+              <?php foreach($catalogServices as $service): ?>
+                <option value="<?= (int) $service['id'] ?>" <?= (string)$form['service_id'] === (string)$service['id'] ? 'selected' : '' ?>>
+                  <?= $this->e($service['name']) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </label>
+          <label>Service Name
+            <input name="custom_name" value="<?= $this->e($form['custom_name']) ?>" placeholder="e.g. Acme Corp" required />
+          </label>
+          <label>Service URL
+            <input name="website_url" type="url" value="<?= $this->e($form['website_url']) ?>" placeholder="https://example.com" />
+          </label>
+          <label>Category
+            <select name="category_id">
+              <option value="0">Uncategorized</option>
+              <?php foreach($categories as $category): ?>
+                <option value="<?= (int) $category['id'] ?>" <?= (string)$form['category_id'] === (string)$category['id'] ? 'selected' : '' ?>>
+                  <?= $this->e($category['name']) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </label>
+          <fieldset class="span-all checkbox-grid">
+            <legend>What data is stored?</legend>
+            <?php foreach($dataTypes as $type): ?>
+              <label>
+                <input type="checkbox" name="data_type_ids[]" value="<?= (int) $type['id'] ?>" <?= in_array($type['id'], $form['data_type_ids']) ? 'checked' : '' ?> />
+                <?= $this->e($type['name']) ?>
+              </label>
+            <?php endforeach; ?>
+          </fieldset>
+          <label class="span-all">Optional Notes
+            <textarea name="notes" maxlength="1000" placeholder="Add specific details about data usage or retention policies..."><?= $this->e($form['notes']) ?></textarea>
+          </label>
+          <div class="actions span-all form-actions">
+            <a class="button secondary" href="/services">Cancel</a>
+            <button type="submit">Save</button>
+          </div>
+        </form>
+        <aside class="risk-preview">
+          <article class="panel bordered-panel">
+            <h2>Risk Estimation</h2>
+            <div class="risk-ring"><span>LOW</span></div>
+            <p><strong>Privacy Score: 92/100</strong><br><span class="muted">Based on standard social media disclosures.</span></p>
+            <p><strong>Encryption Check</strong><br><span class="muted">Service supports end-to-end data obfuscation.</span></p>
+            <div class="pro-tip">
+              <strong>Pro Tip</strong>
+              <p>Adding specific data types helps generate more accurate cleanup requests later.</p>
+            </div>
+          </article>
+          <article class="quote-card">"Transparency is the foundation of digital sovereignty."</article>
+        </aside>
+      </section>
+    </main>
+  </body>
+</html>

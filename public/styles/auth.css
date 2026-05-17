@@ -1,0 +1,29 @@
+.auth-page {
+  background: #f7f8f8;
+}
+
+.auth-card {
+  width: min(420px, 100%);
+  padding: 1.8rem;
+  box-shadow: 0 16px 36px rgba(40, 47, 51, 0.04);
+}
+
+.auth-card h1 {
+  font-size: 2rem;
+  font-weight: 820;
+}
+
+.auth-card .muted {
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.auth-card input {
+  min-height: 52px;
+  border-width: 2px;
+  border-radius: 10px;
+}
+
+.auth-card button {
+  min-height: 48px;
+}

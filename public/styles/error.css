@@ -1,0 +1,9 @@
+.error-page .panel {
+  max-width: 560px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.error-page h1 {
+  font-size: 2.4rem;
+}
