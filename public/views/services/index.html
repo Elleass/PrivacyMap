@@ -69,9 +69,41 @@
         <?php endforeach; ?>
       </section>
       <?php if(!$services): ?><p class="panel">No services match your filters.</p><?php endif; ?>
+      <?php
+        $pageUrl = function (int $page) use ($pagination) {
+            return '/services?' . http_build_query(array_merge($pagination['baseParams'], ['page' => $page]));
+        };
+      ?>
       <footer class="list-footer">
-        <strong><?= count($services) ?> Sources Active</strong>
-        <span>Previous <b>1</b> Next</span>
+        <strong>
+          <?= (int) $pagination['totalItems'] ?> Sources Active
+          <?php if($pagination['totalItems']): ?>
+            <span class="page-count">Page <?= (int) $pagination['currentPage'] ?> of <?= (int) $pagination['totalPages'] ?></span>
+          <?php endif; ?>
+        </strong>
+        <?php if($pagination['totalPages'] > 1): ?>
+          <nav class="pagination" aria-label="Services pages">
+            <?php if($pagination['currentPage'] > 1): ?>
+              <a href="<?= $this->e($pageUrl($pagination['currentPage'] - 1)) ?>">Previous</a>
+            <?php else: ?>
+              <span class="disabled">Previous</span>
+            <?php endif; ?>
+
+            <?php for($page = 1; $page <= $pagination['totalPages']; $page++): ?>
+              <?php if($page === $pagination['currentPage']): ?>
+                <span class="current" aria-current="page"><?= $page ?></span>
+              <?php else: ?>
+                <a href="<?= $this->e($pageUrl($page)) ?>"><?= $page ?></a>
+              <?php endif; ?>
+            <?php endfor; ?>
+
+            <?php if($pagination['currentPage'] < $pagination['totalPages']): ?>
+              <a href="<?= $this->e($pageUrl($pagination['currentPage'] + 1)) ?>">Next</a>
+            <?php else: ?>
+              <span class="disabled">Next</span>
+            <?php endif; ?>
+          </nav>
+        <?php endif; ?>
       </footer>
     </main>
   </body>

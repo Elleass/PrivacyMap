@@ -1,3 +1,4 @@
+DROP VIEW IF EXISTS user_service_summary CASCADE;
 DROP TABLE IF EXISTS audit_logs CASCADE;
 DROP TABLE IF EXISTS recommendations CASCADE;
 DROP TABLE IF EXISTS service_data_types CASCADE;
@@ -7,6 +8,9 @@ DROP TABLE IF EXISTS data_types CASCADE;
 DROP TABLE IF EXISTS categories CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS roles CASCADE;
+DROP FUNCTION IF EXISTS set_updated_at() CASCADE;
+DROP FUNCTION IF EXISTS privacy_risk_level(INTEGER) CASCADE;
+DROP FUNCTION IF EXISTS calculate_privacy_health(INTEGER) CASCADE;
 
 CREATE TABLE roles (
     id SERIAL PRIMARY KEY,
@@ -91,3 +95,80 @@ CREATE INDEX idx_user_services_user_id ON user_services(user_id);
 CREATE INDEX idx_service_data_types_user_service_id ON service_data_types(user_service_id);
 CREATE INDEX idx_recommendations_user_service_id ON recommendations(user_service_id);
 CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
+
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_users_updated_at
+BEFORE UPDATE ON users
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER trg_services_updated_at
+BEFORE UPDATE ON services
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER trg_user_services_updated_at
+BEFORE UPDATE ON user_services
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
+CREATE OR REPLACE FUNCTION privacy_risk_level(score INTEGER)
+RETURNS VARCHAR(20) AS $$
+BEGIN
+    IF score >= 9 THEN
+        RETURN 'high';
+    ELSIF score >= 4 THEN
+        RETURN 'medium';
+    END IF;
+
+    RETURN 'low';
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION calculate_privacy_health(target_user_id INTEGER)
+RETURNS INTEGER AS $$
+DECLARE
+    total_services INTEGER;
+    data_points INTEGER;
+    high_risk INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO total_services
+    FROM user_services
+    WHERE user_id = target_user_id;
+
+    SELECT COUNT(*) INTO data_points
+    FROM user_services us
+    JOIN service_data_types sdt ON sdt.user_service_id = us.id
+    WHERE us.user_id = target_user_id;
+
+    SELECT COUNT(*) INTO high_risk
+    FROM user_services
+    WHERE user_id = target_user_id AND risk_level = 'high';
+
+    RETURN GREATEST(0, 100 - (high_risk * 12) - GREATEST(0, data_points - total_services) * 2);
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+CREATE VIEW user_service_summary AS
+SELECT
+    us.id,
+    us.user_id,
+    COALESCE(us.custom_name, s.name) AS display_name,
+    c.name AS category_name,
+    us.risk_score,
+    us.risk_level,
+    COUNT(sdt.id) AS data_points,
+    us.created_at,
+    us.updated_at
+FROM user_services us
+LEFT JOIN services s ON s.id = us.service_id
+LEFT JOIN categories c ON c.id = us.category_id
+LEFT JOIN service_data_types sdt ON sdt.user_service_id = us.id
+GROUP BY us.id, s.name, c.name;

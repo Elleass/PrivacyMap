@@ -12,11 +12,11 @@
       <?php if(isset($messages) && $messages): ?>
         <p class="message"><?= $this->e($messages) ?></p>
       <?php endif; ?>
-      <form method="POST" action="/login" class="stack">
+      <form method="POST" action="/login" class="stack auth-form" data-auth-form="login" novalidate>
         <input type="hidden" name="csrf_token" value="<?= $this->e($csrfToken) ?>" />
-        <label>Email <input name="email" type="email" required /></label>
-        <label>Password <input name="password" type="password" required /></label>
-        <button type="submit">Login</button>
+        <label>Email <input name="email" type="email" autocomplete="email" maxlength="255" required /></label>
+        <label>Password <input name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required /></label>
+        <button type="submit" data-loading-text="Signing in...">Login</button>
       </form>
       <p class="muted">Demo: user@example.com / password or admin@example.com / password</p>
       <a href="/register">Create an account</a>

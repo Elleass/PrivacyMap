@@ -24,6 +24,7 @@ class ServicesController extends AppController {
     public function index(): void
     {
         $this->requireAuth();
+        $userId = (int) $this->currentUser()['id'];
         $filters = [
             'q' => trim($_GET['q'] ?? ''),
             'category_id' => $_GET['category_id'] ?? '',
@@ -31,12 +32,24 @@ class ServicesController extends AppController {
             'risk_level' => $_GET['risk_level'] ?? '',
             'sort' => $_GET['sort'] ?? '',
         ];
+        $perPage = 5;
+        $totalServices = $this->servicesRepository->countForUser($userId, $filters);
+        $totalPages = max(1, (int) ceil($totalServices / $perPage));
+        $currentPage = min($totalPages, max(1, (int) ($_GET['page'] ?? 1)));
+        $offset = ($currentPage - 1) * $perPage;
 
         $this->render('services/index', [
-            'services' => $this->servicesRepository->listForUser((int) $this->currentUser()['id'], $filters),
+            'services' => $this->servicesRepository->listForUser($userId, $filters, $perPage, $offset),
             'categories' => $this->catalogRepository->categories(),
             'dataTypes' => $this->catalogRepository->dataTypes(),
             'filters' => $filters,
+            'pagination' => [
+                'currentPage' => $currentPage,
+                'totalPages' => $totalPages,
+                'totalItems' => $totalServices,
+                'perPage' => $perPage,
+                'baseParams' => array_filter($filters, fn($value) => $value !== '' && $value !== null),
+            ],
         ]);
     }
 
@@ -139,9 +152,21 @@ class ServicesController extends AppController {
         $this->verifyCsrf();
         $service = $this->servicesRepository->findOwned($serviceId, (int) $this->currentUser()['id']);
         if ($service) {
-            $this->recommendationsRepository->complete($recommendationId, $serviceId);
-            $this->auditLogRepository->log((int) $this->currentUser()['id'], 'completed_recommendation', 'recommendation', $recommendationId);
+            $completed = $this->recommendationsRepository->complete($recommendationId, $serviceId);
+
+            if ($completed) {
+                $this->auditLogRepository->log((int) $this->currentUser()['id'], 'completed_recommendation', 'recommendation', $recommendationId);
+            }
+
+            if ($completed && $this->wantsJson()) {
+                $this->json(['success' => true, 'recommendationId' => $recommendationId]);
+            }
         }
+
+        if ($this->wantsJson()) {
+            $this->json(['success' => false, 'message' => 'Recommendation was not found.'], 404);
+        }
+
         $this->redirect('/services/' . $serviceId);
     }
 
@@ -165,13 +190,21 @@ class ServicesController extends AppController {
 
     private function serviceFormData(): array
     {
+        $dataTypeIds = $_POST['data_type_ids'] ?? [];
+        if (!is_array($dataTypeIds)) {
+            $dataTypeIds = [$dataTypeIds];
+        }
+
         return [
             'service_id' => (int) ($_POST['service_id'] ?? 0),
             'category_id' => (int) ($_POST['category_id'] ?? 0),
             'custom_name' => trim($_POST['custom_name'] ?? ''),
             'website_url' => trim($_POST['website_url'] ?? ''),
             'notes' => trim($_POST['notes'] ?? ''),
-            'data_type_ids' => array_map('intval', $_POST['data_type_ids'] ?? []),
+            'data_type_ids' => array_values(array_unique(array_filter(
+                array_map('intval', $dataTypeIds),
+                fn($id) => $id > 0
+            ))),
         ];
     }
 

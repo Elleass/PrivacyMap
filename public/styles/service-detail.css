@@ -10,8 +10,29 @@
   gap: 1.4rem;
 }
 
-.network-art {
-  min-height: 230px;
+.recommendation-row.completed {
+  opacity: 0.72;
+}
+
+.completed-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  border-radius: 4px;
+  padding: 0.35rem 0.7rem;
+  background: var(--low-bg);
+  color: #0b513c;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.inline-status {
+  margin: 0.45rem 0 0;
+  color: var(--danger);
+  font-size: 0.8rem;
+  font-weight: 800;
 }
 
 @media (max-width: 1366px) {
@@ -27,7 +48,4 @@
     gap: 1rem;
   }
 
-  .network-art {
-    min-height: 190px;
-  }
 }

@@ -45,15 +45,17 @@ class RecommendationsRepository extends Repository {
         }
     }
 
-    public function complete(int $recommendationId, int $userServiceId): void
+    public function complete(int $recommendationId, int $userServiceId): bool
     {
         $query = $this->connection->prepare(
             "
             UPDATE recommendations
             SET is_completed = TRUE
-            WHERE id = :recommendation_id AND user_service_id = :user_service_id
+            WHERE id = :recommendation_id AND user_service_id = :user_service_id AND is_completed = FALSE
             "
         );
         $query->execute([':recommendation_id' => $recommendationId, ':user_service_id' => $userServiceId]);
+
+        return $query->rowCount() > 0;
     }
 }

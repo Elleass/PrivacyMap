@@ -7,7 +7,7 @@ services:
       - "8080:80"
     volumes:
       - .:/app/
-    links:
+    depends_on:
       - php
     networks:
       - pg-network
@@ -21,6 +21,7 @@ services:
     networks:
       - pg-network
     volumes:
+      - pg-data:/var/lib/postgresql/data
       - ./docker/db/init:/docker-entrypoint-initdb.d
   
   php:

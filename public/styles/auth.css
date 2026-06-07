@@ -22,8 +22,46 @@
   min-height: 52px;
   border-width: 2px;
   border-radius: 10px;
+  font-size: 1.05rem;
+  font-weight: 750;
+}
+
+.auth-card input.invalid {
+  border-color: var(--danger);
+  background: #fff7f7;
 }
 
 .auth-card button {
   min-height: 48px;
+}
+
+.auth-card button:disabled {
+  cursor: wait;
+  opacity: 0.78;
+}
+
+.auth-card button.is-loading::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  margin-left: 0.7rem;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+.field-error {
+  color: var(--danger);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.35;
+  text-transform: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

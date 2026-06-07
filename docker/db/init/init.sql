@@ -1,2 +1,2 @@
-\i /docker-entrypoint-initdb.d/schema.sql
-\i /docker-entrypoint-initdb.d/seed.sql
+-- Docker executes schema.sql and seed.sql from this directory automatically.
+-- This file is intentionally left without executable SQL to avoid duplicate imports.

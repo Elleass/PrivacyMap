@@ -48,6 +48,7 @@ The app does not store passwords, API tokens, or login data for external service
 ## Database Model
 
 The schema is stored in [docker/db/init/schema.sql](docker/db/init/schema.sql). Seed data is stored in [docker/db/init/seed.sql](docker/db/init/seed.sql).
+An export-style restore script is available at [docs/privacy_map_backup.sql](docs/privacy_map_backup.sql).
 
 Main tables:
 
@@ -60,6 +61,8 @@ Main tables:
 - `service_data_types`
 - `recommendations`
 - `audit_logs`
+
+The schema also includes a PostgreSQL view (`user_service_summary`), trigger-backed `updated_at` maintenance, and database functions for risk/health calculations.
 
 ER diagram: [docs/er-diagram.md](docs/er-diagram.md)
 
@@ -138,21 +141,4 @@ New accounts created through the registration form use `password_hash()` and are
 - Admin-only routes require the `admin` role.
 - Demo data is fictional.
 
-## Figma And Screenshots
-
-Add the final Figma prototype link here before submission:
-
-```text
-Figma prototype: TODO
-```
-
-Add screenshots after running the app locally:
-
-```text
-docs/screenshots/login.png
-docs/screenshots/dashboard.png
-docs/screenshots/services.png
-docs/screenshots/service-details.png
-docs/screenshots/insights.png
-docs/screenshots/admin.png
-```
+ 

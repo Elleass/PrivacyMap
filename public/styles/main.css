@@ -174,23 +174,29 @@ legend {
 .nav-links a.active {
   color: #111820;
   border-bottom-color: #111820;
+  font-weight: 900;
 }
 
-.nav-icon {
+.nav-logout {
   position: fixed;
   right: 2.5rem;
 }
 
-.nav-icon a {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  padding: 0;
-  border: 3px solid #0f1418;
-  border-radius: 50%;
+.nav-logout form {
+  margin: 0;
+}
+
+.nav-logout button {
+  min-height: 0;
+  padding: 1.95rem 0 1.55rem;
+  background: transparent;
   color: #0f1418;
-  font-size: 0.55rem;
+  box-shadow: none;
+  font-weight: 850;
+}
+
+.nav-logout button:hover {
+  background: transparent;
 }
 
 .menu-button {
@@ -457,8 +463,7 @@ legend {
   background: #eef3f6;
 }
 
-.health-card,
-.audit-cta {
+.health-card {
   border-radius: 24px;
   background: var(--mint);
   padding: 2rem;
@@ -736,45 +741,6 @@ legend {
   padding-top: 1.6rem;
 }
 
-.map-card {
-  margin-bottom: 2rem;
-  border-radius: 24px;
-  padding: 2rem;
-  background: #edf3f6;
-}
-
-.network-art {
-  position: relative;
-  display: grid;
-  min-height: 280px;
-  place-items: end start;
-  overflow: hidden;
-  border-radius: 8px;
-  padding: 1.2rem;
-  background:
-    radial-gradient(circle at center, transparent 0 18px, rgba(160, 220, 230, 0.25) 19px 21px, transparent 22px 38px, rgba(160, 220, 230, 0.25) 39px 41px, transparent 42px 58px, rgba(160, 220, 230, 0.25) 59px 61px, transparent 62px),
-    linear-gradient(135deg, #0d2228, #102f36);
-}
-
-.network-art::before {
-  content: "";
-  position: absolute;
-  inset: 20%;
-  border-radius: 50%;
-  background: repeating-conic-gradient(from 10deg, rgba(180, 240, 246, 0.6) 0 2deg, transparent 2deg 9deg);
-  opacity: 0.65;
-}
-
-.network-art span {
-  position: relative;
-  z-index: 1;
-  border-radius: 9px;
-  padding: 0.8rem 1rem;
-  background: #fff;
-  color: var(--text);
-  font-weight: 900;
-}
-
 .quick-insight {
   max-width: 340px;
   padding: 2rem;
@@ -788,20 +754,6 @@ legend {
 
 .top-service-row a {
   flex: 1;
-}
-
-.audit-cta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  margin-top: 4rem;
-  background: #5a5956;
-  color: #fff;
-}
-
-.audit-cta p {
-  color: #e8e8e6;
 }
 
 .list-footer {
@@ -870,14 +822,13 @@ legend {
     font-size: 0.9rem;
   }
 
-  .nav-icon {
-    right: 1.6rem;
+  .nav-logout button {
+    padding: 1.35rem 0 1.1rem;
+    font-size: 0.9rem;
   }
 
-  .nav-icon a {
-    width: 28px;
-    height: 28px;
-    border-width: 2px;
+  .nav-logout {
+    right: 1.6rem;
   }
 
   .page {
@@ -1031,8 +982,7 @@ legend {
     margin-bottom: 0.75rem;
   }
 
-  .health-card,
-  .audit-cta {
+  .health-card {
     border-radius: 18px;
     padding: 1.35rem;
   }
@@ -1126,23 +1076,11 @@ legend {
     padding: 1.3rem 0;
   }
 
-  .map-card {
-    margin-bottom: 1.25rem;
-    padding: 1.35rem;
-  }
-
-  .network-art {
-    min-height: 210px;
-  }
-
   .quick-insight {
     max-width: 300px;
     padding: 1.35rem;
   }
 
-  .audit-cta {
-    margin-top: 2.4rem;
-  }
 }
 
 @media (max-width: 980px) {
@@ -1206,7 +1144,20 @@ legend {
     padding: 0.8rem 0;
   }
 
-  .nav-icon {
+  .nav-links a.active {
+    border-bottom-color: transparent;
+    color: #111820;
+    text-decoration: underline;
+    text-underline-offset: 0.35rem;
+  }
+
+  .nav-logout button {
+    justify-content: flex-start;
+    width: 100%;
+    padding: 0.8rem 0;
+  }
+
+  .nav-logout {
     position: static;
   }
 
@@ -1219,7 +1170,6 @@ legend {
   .section-title,
   .list-row,
   .actions,
-  .audit-cta,
   .panel-actions {
     align-items: stretch;
     flex-direction: column;

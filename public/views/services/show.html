@@ -57,26 +57,22 @@
         </article>
 
         <aside>
-          <article class="map-card">
-            <p class="eyebrow">Propagation Map</p>
-            <div class="network-art">
-              <span>Tracking Active: <?= count($dataTypes) ?> Nodes</span>
-            </div>
-          </article>
           <article class="panel">
             <h2>Privacy Recommendation</h2>
             <?php foreach($recommendations as $item): ?>
-              <div class="recommendation-row">
+              <div class="recommendation-row <?= $item['is_completed'] ? 'completed' : '' ?>" data-recommendation-id="<?= (int) $item['id'] ?>">
                 <span class="shield-mini">◆</span>
                 <div>
                   <strong><?= $this->e($item['title']) ?></strong>
                   <p class="muted"><?= $this->e($item['description']) ?></p>
                 </div>
                 <?php if(!$item['is_completed']): ?>
-                  <form method="POST" action="/services/<?= (int) $service['id'] ?>/recommendations/<?= (int) $item['id'] ?>/complete">
+                  <form method="POST" action="/services/<?= (int) $service['id'] ?>/recommendations/<?= (int) $item['id'] ?>/complete" data-fetch-complete>
                     <input type="hidden" name="csrf_token" value="<?= $this->e($csrfToken) ?>" />
                     <button class="button secondary" type="submit">Done</button>
                   </form>
+                <?php else: ?>
+                  <span class="completed-label">Completed</span>
                 <?php endif; ?>
               </div>
             <?php endforeach; ?>

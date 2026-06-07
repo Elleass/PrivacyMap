@@ -3,7 +3,7 @@
 require_once 'Repository.php';
 
 class UserServicesRepository extends Repository {
-    public function listForUser(int $userId, array $filters = []): array
+    public function listForUser(int $userId, array $filters = [], int $limit = 6, int $offset = 0): array
     {
         $sql = "
             SELECT us.*, COALESCE(us.custom_name, s.name) AS display_name, c.name AS category_name,
@@ -14,35 +14,41 @@ class UserServicesRepository extends Repository {
             LEFT JOIN service_data_types sdt ON sdt.user_service_id = us.id
             WHERE us.user_id = :user_id
         ";
-        $params = [':user_id' => $userId];
-
-        if (!empty($filters['q'])) {
-            $sql .= " AND (LOWER(COALESCE(us.custom_name, s.name)) LIKE :q OR LOWER(us.notes) LIKE :q)";
-            $params[':q'] = '%' . strtolower($filters['q']) . '%';
-        }
-        if (!empty($filters['category_id'])) {
-            $sql .= " AND us.category_id = :category_id";
-            $params[':category_id'] = (int) $filters['category_id'];
-        }
-        if (!empty($filters['risk_level'])) {
-            $sql .= " AND us.risk_level = :risk_level";
-            $params[':risk_level'] = $filters['risk_level'];
-        }
-        if (!empty($filters['data_type_id'])) {
-            $sql .= " AND EXISTS (
-                SELECT 1 FROM service_data_types filter_sdt
-                WHERE filter_sdt.user_service_id = us.id AND filter_sdt.data_type_id = :data_type_id
-            )";
-            $params[':data_type_id'] = (int) $filters['data_type_id'];
-        }
+        [$whereSql, $params] = $this->filterSql($userId, $filters);
+        $sql .= $whereSql;
 
         $sql .= " GROUP BY us.id, s.name, c.name";
         $sql .= (($filters['sort'] ?? '') === 'risk') ? " ORDER BY us.risk_score DESC, display_name" : " ORDER BY us.created_at DESC";
+        $sql .= " LIMIT :limit OFFSET :offset";
 
         $query = $this->connection->prepare($sql);
-        $query->execute($params);
+        foreach ($params as $key => $value) {
+            $query->bindValue($key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $query->execute();
 
         return $query->fetchAll();
+    }
+
+    public function countForUser(int $userId, array $filters = []): int
+    {
+        $sql = "
+            SELECT COUNT(*)
+            FROM user_services us
+            LEFT JOIN services s ON s.id = us.service_id
+            WHERE us.user_id = :user_id
+        ";
+        [$whereSql, $params] = $this->filterSql($userId, $filters);
+        $query = $this->connection->prepare($sql . $whereSql);
+
+        foreach ($params as $key => $value) {
+            $query->bindValue($key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $query->execute();
+
+        return (int) $query->fetchColumn();
     }
 
     public function findOwned(int $id, int $userId): ?array
@@ -91,58 +97,83 @@ class UserServicesRepository extends Repository {
     public function create(int $userId, array $data): int
     {
         [$score, $level] = $this->calculateRisk($data['data_type_ids']);
-        $query = $this->connection->prepare(
-            "
-            INSERT INTO user_services (user_id, service_id, category_id, custom_name, website_url, notes, risk_score, risk_level)
-            VALUES (:user_id, :service_id, :category_id, :custom_name, :website_url, :notes, :risk_score, :risk_level)
-            RETURNING id
-            "
-        );
-        $query->execute([
-            ':user_id' => $userId,
-            ':service_id' => $data['service_id'] ?: null,
-            ':category_id' => $data['category_id'] ?: null,
-            ':custom_name' => $data['custom_name'],
-            ':website_url' => $data['website_url'],
-            ':notes' => $data['notes'],
-            ':risk_score' => $score,
-            ':risk_level' => $level,
-        ]);
-        $id = (int) $query->fetchColumn();
-        $this->syncDataTypes($id, $data['data_type_ids']);
 
-        return $id;
+        try {
+            $this->connection->beginTransaction();
+
+            $query = $this->connection->prepare(
+                "
+                INSERT INTO user_services (user_id, service_id, category_id, custom_name, website_url, notes, risk_score, risk_level)
+                VALUES (:user_id, :service_id, :category_id, :custom_name, :website_url, :notes, :risk_score, :risk_level)
+                RETURNING id
+                "
+            );
+            $query->execute([
+                ':user_id' => $userId,
+                ':service_id' => $data['service_id'] ?: null,
+                ':category_id' => $data['category_id'] ?: null,
+                ':custom_name' => $data['custom_name'],
+                ':website_url' => $data['website_url'],
+                ':notes' => $data['notes'],
+                ':risk_score' => $score,
+                ':risk_level' => $level,
+            ]);
+            $id = (int) $query->fetchColumn();
+            $this->syncDataTypes($id, $data['data_type_ids']);
+
+            $this->connection->commit();
+
+            return $id;
+        } catch (Throwable $e) {
+            if ($this->connection->inTransaction()) {
+                $this->connection->rollBack();
+            }
+
+            throw $e;
+        }
     }
 
     public function update(int $id, int $userId, array $data): void
     {
         [$score, $level] = $this->calculateRisk($data['data_type_ids']);
-        $query = $this->connection->prepare(
-            "
-            UPDATE user_services
-            SET service_id = :service_id,
-                category_id = :category_id,
-                custom_name = :custom_name,
-                website_url = :website_url,
-                notes = :notes,
-                risk_score = :risk_score,
-                risk_level = :risk_level,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE id = :id AND user_id = :user_id
-            "
-        );
-        $query->execute([
-            ':id' => $id,
-            ':user_id' => $userId,
-            ':service_id' => $data['service_id'] ?: null,
-            ':category_id' => $data['category_id'] ?: null,
-            ':custom_name' => $data['custom_name'],
-            ':website_url' => $data['website_url'],
-            ':notes' => $data['notes'],
-            ':risk_score' => $score,
-            ':risk_level' => $level,
-        ]);
-        $this->syncDataTypes($id, $data['data_type_ids']);
+
+        try {
+            $this->connection->beginTransaction();
+
+            $query = $this->connection->prepare(
+                "
+                UPDATE user_services
+                SET service_id = :service_id,
+                    category_id = :category_id,
+                    custom_name = :custom_name,
+                    website_url = :website_url,
+                    notes = :notes,
+                    risk_score = :risk_score,
+                    risk_level = :risk_level
+                WHERE id = :id AND user_id = :user_id
+                "
+            );
+            $query->execute([
+                ':id' => $id,
+                ':user_id' => $userId,
+                ':service_id' => $data['service_id'] ?: null,
+                ':category_id' => $data['category_id'] ?: null,
+                ':custom_name' => $data['custom_name'],
+                ':website_url' => $data['website_url'],
+                ':notes' => $data['notes'],
+                ':risk_score' => $score,
+                ':risk_level' => $level,
+            ]);
+            $this->syncDataTypes($id, $data['data_type_ids']);
+
+            $this->connection->commit();
+        } catch (Throwable $e) {
+            if ($this->connection->inTransaction()) {
+                $this->connection->rollBack();
+            }
+
+            throw $e;
+        }
     }
 
     public function delete(int $id, int $userId): void
@@ -198,5 +229,33 @@ class UserServicesRepository extends Repository {
                 $insert->execute([':service_id' => $serviceId, ':data_type_id' => $dataTypeId]);
             }
         }
+    }
+
+    private function filterSql(int $userId, array $filters): array
+    {
+        $sql = "";
+        $params = [':user_id' => $userId];
+
+        if (!empty($filters['q'])) {
+            $sql .= " AND (LOWER(COALESCE(us.custom_name, s.name)) LIKE :q OR LOWER(us.notes) LIKE :q)";
+            $params[':q'] = '%' . strtolower($filters['q']) . '%';
+        }
+        if (!empty($filters['category_id'])) {
+            $sql .= " AND us.category_id = :category_id";
+            $params[':category_id'] = (int) $filters['category_id'];
+        }
+        if (!empty($filters['risk_level'])) {
+            $sql .= " AND us.risk_level = :risk_level";
+            $params[':risk_level'] = $filters['risk_level'];
+        }
+        if (!empty($filters['data_type_id'])) {
+            $sql .= " AND EXISTS (
+                SELECT 1 FROM service_data_types filter_sdt
+                WHERE filter_sdt.user_service_id = us.id AND filter_sdt.data_type_id = :data_type_id
+            )";
+            $params[':data_type_id'] = (int) $filters['data_type_id'];
+        }
+
+        return [$sql, $params];
     }
 }

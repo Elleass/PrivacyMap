@@ -2,18 +2,27 @@
   <a class="brand" href="/dashboard">PrivacyMap</a>
   <button class="menu-button" type="button" aria-label="Open navigation">Menu</button>
   <ul class="nav-links">
+    <?php
+      $activePath = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '', '/');
+      $navAttrs = fn(bool $active) => $active ? ' class="active" aria-current="page"' : '';
+      $isSection = fn(string $section) => $activePath === $section || str_starts_with($activePath, $section . '/');
+    ?>
     <?php if(isset($currentUser) && $currentUser): ?>
-      <?php $activePath = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'); ?>
-      <li><a class="<?= $activePath === 'dashboard' ? 'active' : '' ?>" href="/dashboard">Dashboard</a></li>
-      <li><a class="<?= str_starts_with($activePath, 'services') ? 'active' : '' ?>" href="/services">Services</a></li>
-      <li><a class="<?= $activePath === 'insights' ? 'active' : '' ?>" href="/insights">Insights</a></li>
+      <li><a<?= $navAttrs($activePath === 'dashboard') ?> href="/dashboard">Dashboard</a></li>
+      <li><a<?= $navAttrs($isSection('services')) ?> href="/services">Services</a></li>
+      <li><a<?= $navAttrs($activePath === 'insights') ?> href="/insights">Insights</a></li>
       <?php if(($currentUser['role'] ?? '') === 'admin'): ?>
-        <li><a class="<?= $activePath === 'admin' ? 'active' : '' ?>" href="/admin">Admin</a></li>
+        <li><a<?= $navAttrs($isSection('admin')) ?> href="/admin">Admin</a></li>
       <?php endif; ?>
-      <li class="nav-icon"><a title="Logout" href="/logout">●</a></li>
+      <li class="nav-logout">
+        <form method="POST" action="/logout">
+          <input type="hidden" name="csrf_token" value="<?= $this->e($csrfToken) ?>" />
+          <button type="submit">Logout</button>
+        </form>
+      </li>
     <?php else: ?>
-      <li><a href="/login">Login</a></li>
-      <li><a href="/register">Register</a></li>
+      <li><a<?= $navAttrs($activePath === '' || $activePath === 'login') ?> href="/login">Login</a></li>
+      <li><a<?= $navAttrs($activePath === 'register') ?> href="/register">Register</a></li>
     <?php endif; ?>
   </ul>
 </nav>
