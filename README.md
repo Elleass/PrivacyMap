@@ -104,6 +104,33 @@ docker/db/init/seed.sql
 
 If the database volume already exists, recreate it to rerun seed scripts.
 
+## Screenshots of the application
+
+## Log-in panel
+
+<img width="713" height="671" alt="obraz" src="https://github.com/user-attachments/assets/74cc4aec-660a-461e-8f84-0d07c099d1d6" />
+
+## Dashboard
+
+<img width="1666" height="790" alt="obraz" src="https://github.com/user-attachments/assets/84cb34a4-afb8-450d-bfc3-3ca93af992f3" />
+
+## Data Sources
+
+<img width="1813" height="768" alt="obraz" src="https://github.com/user-attachments/assets/ee697806-9953-419a-80c6-a44c8f9d59aa" />
+
+## Insight Panel
+
+<img width="1827" height="863" alt="obraz" src="https://github.com/user-attachments/assets/2afc5712-b885-40fb-94fd-493bdf866fd0" />
+
+## Add Service Panel
+
+<img width="1591" height="771" alt="obraz" src="https://github.com/user-attachments/assets/12c2e7fe-c490-49e5-8d5c-9a584a4e7eab" />
+
+## Service Details
+
+<img width="1648" height="777" alt="obraz" src="https://github.com/user-attachments/assets/0117832f-0950-4211-b61d-367d531a5ccd" />
+
+
 ## Test Accounts
 
 ```text
